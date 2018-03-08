@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
                 this, NOTIFICATION_ID, mUpdateIntent, PendingIntent.FLAG_ONE_SHOT);
 
         // delete intent - for when user deletes notification from the notification panel
-        mDeleteIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
-        mDeletePendingIntent = PendingIntent.get
+        // mDeleteIntent = new Intent(Intent.ACTION_DELETE);
+        // mDeletePendingIntent = PendingIntent.getActivity()
 
         // register Broadcast Receiver to receive intent
         registerReceiver(mNotificationReceiver, new IntentFilter(ACTION_UPDATE_NOTIFICATION));
