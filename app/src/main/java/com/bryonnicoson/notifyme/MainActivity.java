@@ -55,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
                 cancelNotification();
             }
         });
+
+        mNotifyButton.setEnabled(true);
+        mUpdateButton.setEnabled(false);
+        mCancelButton.setEnabled(false);
     }
 
     public void createChannel() {
@@ -76,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendNotification() {
 
+        mNotifyButton.setEnabled(false);
+        mUpdateButton.setEnabled(true);
+        mCancelButton.setEnabled(true);
+
         // create an intent for the notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
@@ -95,6 +103,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateNotification() {
+
+        mNotifyButton.setEnabled(false);
+        mUpdateButton.setEnabled(false);
+        mCancelButton.setEnabled(true);
+
         Bitmap androidImage = BitmapFactory.decodeResource(getResources(),R.drawable.mascot_1);
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
@@ -114,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cancelNotification() {
+
+        mNotifyButton.setEnabled(true);
+        mUpdateButton.setEnabled(false);
+        mCancelButton.setEnabled(false);
+
         mNotificationManager.cancel(NOTIFICATION_ID);
 
     }
