@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +19,16 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String CHANNEL_ID = "com.bryonnicoson.notifyme.ANDROID";
     private static final int NOTIFICATION_ID = 0;
+    private static final String NOTIFICATION_GUIDE_URL =
+            "https://developer.android.com/design/patterns/notifications.html";
 
     private NotificationManager mNotificationManager;
     private NotificationChannel mNotificationChannel;
+
+    private Intent mNotificationIntent;
+    private Intent mLearnMoreIntent;
+    private PendingIntent mNotificationPendingIntent;
+    private PendingIntent mLearnMorePendingIntent;
 
     private Button mNotifyButton;
     private Button mUpdateButton;
@@ -59,6 +67,16 @@ public class MainActivity extends AppCompatActivity {
         mNotifyButton.setEnabled(true);
         mUpdateButton.setEnabled(false);
         mCancelButton.setEnabled(false);
+
+        // create an intent for the notification
+        mNotificationIntent = new Intent(this, MainActivity.class);
+        mNotificationPendingIntent = PendingIntent.getActivity(this,
+                NOTIFICATION_ID, mNotificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // create an implicit intent for the notification
+        mLearnMoreIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(NOTIFICATION_GUIDE_URL));
+        mLearnMorePendingIntent = PendingIntent.getActivity(
+                this, NOTIFICATION_ID, mLearnMoreIntent, PendingIntent.FLAG_ONE_SHOT);
     }
 
     public void createChannel() {
@@ -84,19 +102,15 @@ public class MainActivity extends AppCompatActivity {
         mUpdateButton.setEnabled(true);
         mCancelButton.setEnabled(true);
 
-        // create an intent for the notification
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
-                NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setContentTitle("You've been notified!")
-                        .setContentText("This is your notification text.")
-                        .setContentIntent(notificationPendingIntent)
+                        .setContentText("You should now be aware of this.")
+                        .setContentIntent(mNotificationPendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
-                        .setSmallIcon(R.drawable.ic_android);
+                        .setSmallIcon(R.drawable.ic_android)
+                        .addAction(R.drawable.ic_learn_more, "Learn More", mLearnMorePendingIntent);
 
         Notification myNotification = notificationBuilder.build();
         mNotificationManager.notify(NOTIFICATION_ID, myNotification);
@@ -109,20 +123,20 @@ public class MainActivity extends AppCompatActivity {
         mCancelButton.setEnabled(true);
 
         Bitmap androidImage = BitmapFactory.decodeResource(getResources(),R.drawable.mascot_1);
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
-                NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setContentTitle("You've been notified!")
                         .setContentText("This is your notification text.")
-                        .setContentIntent(notificationPendingIntent)
+                        .setContentIntent(mNotificationPendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
                         .setSmallIcon(R.drawable.ic_android)
                         .setStyle(new NotificationCompat.BigPictureStyle()
                                 .bigPicture(androidImage)
-                                .setBigContentTitle("Notification Updated!"));
+                                .setBigContentTitle("Notification Updated!"))
+                        .addAction(R.drawable.ic_learn_more, "Learn More!", mLearnMorePendingIntent);;
+
         mNotificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
