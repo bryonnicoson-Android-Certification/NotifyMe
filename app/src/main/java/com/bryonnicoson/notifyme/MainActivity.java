@@ -4,7 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -21,14 +24,21 @@ public class MainActivity extends AppCompatActivity {
     private static final int NOTIFICATION_ID = 0;
     private static final String NOTIFICATION_GUIDE_URL =
             "https://developer.android.com/design/patterns/notifications.html";
+    private static final String ACTION_UPDATE_NOTIFICATION =
+            "com.bryonnicoson.notifyme.ACTION_UPDATE_NOTIFICATION";
 
     private NotificationManager mNotificationManager;
     private NotificationChannel mNotificationChannel;
+    private NotificationReceiver mNotificationReceiver;
 
     private Intent mNotificationIntent;
     private Intent mLearnMoreIntent;
+    private Intent mUpdateIntent;
+    private Intent mDeleteIntent;
+    private PendingIntent mDeletePendingIntent;
     private PendingIntent mNotificationPendingIntent;
     private PendingIntent mLearnMorePendingIntent;
+    private PendingIntent mUpdatePendingIntent;
 
     private Button mNotifyButton;
     private Button mUpdateButton;
@@ -68,15 +78,27 @@ public class MainActivity extends AppCompatActivity {
         mUpdateButton.setEnabled(false);
         mCancelButton.setEnabled(false);
 
-        // create an intent for the notification
+        // notification intent
         mNotificationIntent = new Intent(this, MainActivity.class);
         mNotificationPendingIntent = PendingIntent.getActivity(this,
                 NOTIFICATION_ID, mNotificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // create an implicit intent for the notification
+        // learn more implicit intent
         mLearnMoreIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(NOTIFICATION_GUIDE_URL));
         mLearnMorePendingIntent = PendingIntent.getActivity(
                 this, NOTIFICATION_ID, mLearnMoreIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        // update implicit intent
+        mUpdateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+        mUpdatePendingIntent = PendingIntent.getBroadcast(
+                this, NOTIFICATION_ID, mUpdateIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        // delete intent - for when user deletes notification from the notification panel
+        mDeleteIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+        mDeletePendingIntent = PendingIntent.get
+
+        // register Broadcast Receiver to receive intent
+        registerReceiver(mNotificationReceiver, new IntentFilter(ACTION_UPDATE_NOTIFICATION));
     }
 
     public void createChannel() {
@@ -110,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
                         .setSmallIcon(R.drawable.ic_android)
+                        .addAction(R.drawable.ic_update, "Update", mUpdatePendingIntent)
                         .addAction(R.drawable.ic_learn_more, "Learn More", mLearnMorePendingIntent);
 
         Notification myNotification = notificationBuilder.build();
@@ -117,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateNotification() {
-
         mNotifyButton.setEnabled(false);
         mUpdateButton.setEnabled(false);
         mCancelButton.setEnabled(true);
@@ -141,12 +163,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cancelNotification() {
-
         mNotifyButton.setEnabled(true);
         mUpdateButton.setEnabled(false);
         mCancelButton.setEnabled(false);
 
         mNotificationManager.cancel(NOTIFICATION_ID);
+    }
 
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mNotificationReceiver);
+        super.onDestroy();
+    }
+
+    public class NotificationReceiver extends BroadcastReceiver {
+        public NotificationReceiver(){}
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateNotification();
+        }
     }
 }
